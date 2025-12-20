@@ -1,0 +1,17 @@
+
+read_verilog ~/Desktop/ode4ec/faultTests/circuits/register/register.v
+synth -top register
+flatten
+
+dfflibmap -liberty ~/Desktop/ode4ec/faultTests/synthesizedCircuits/15nm/NanGate_15nm_OCL_typical_conditional_ccs.lib
+
+
+abc -liberty ~/Desktop/ode4ec/faultTests/synthesizedCircuits/15nm/NanGate_15nm_OCL_typical_conditional_ccs.lib
+
+
+clean
+
+write_verilog register.s.v
+
+show -format png -prefix synthetized_register_image register
+

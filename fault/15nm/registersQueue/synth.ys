@@ -1,0 +1,17 @@
+
+read_verilog ~/Desktop/ode4ec/faultTests/circuits/registerQueue/registersQueue.v
+read_verilog ~/Desktop/ode4ec/faultTests/circuits/registerQueue/register.v
+synth -top registersQueue
+flatten
+
+
+dfflibmap -liberty ~/Desktop/ode4ec/faultTests/synthesizedCircuits/15nm/NanGate_15nm_OCL_typical_conditional_ccs.lib
+
+
+abc -liberty ~/Desktop/ode4ec/faultTests/synthesizedCircuits/15nm/NanGate_15nm_OCL_typical_conditional_ccs.lib
+
+
+clean
+
+write_verilog registersQueue.s.v
+

@@ -1,0 +1,18 @@
+
+read_verilog ~/Desktop/ode4ec/faultTests/circuits/counter/Counter4Bits.v
+read_verilog ~/Desktop/ode4ec/faultTests/circuits/counter/JkFlipFlop.v
+
+synth -top Counter4Bits
+flatten
+
+dfflibmap -liberty ~/Desktop/ode4ec/faultTests/synthesizedCircuits/15nm/NanGate_15nm_OCL_typical_conditional_ccs.lib
+
+
+abc -liberty ~/Desktop/ode4ec/faultTests/synthesizedCircuits/15nm/NanGate_15nm_OCL_typical_conditional_ccs.lib
+
+
+clean
+
+write_verilog Counter4Bits.s.v
+
+show -format png -prefix synthetized_counter_image Counter4Bits

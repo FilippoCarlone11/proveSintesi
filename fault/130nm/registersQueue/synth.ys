@@ -1,0 +1,18 @@
+
+read_verilog ~/Desktop/ode4ec/faultTests/circuits/registerQueue/registersQueue.v
+read_verilog ~/Desktop/ode4ec/faultTests/circuits/registerQueue/register.v
+synth -top registersQueue
+flatten
+
+dfflibmap -liberty ~/Desktop/ode4ec/faultTests/synthesizedCircuits/130nm/sg13g2_stdcell_typ_1p20V_25C.lib
+
+
+abc -liberty ~/Desktop/ode4ec/faultTests/synthesizedCircuits/130nm/sg13g2_stdcell_typ_1p20V_25C.lib
+
+
+
+clean
+
+write_verilog registersQueue.s.v
+
+
