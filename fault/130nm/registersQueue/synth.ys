@@ -13,6 +13,6 @@ abc -liberty ~/Desktop/ode4ec/faultTests/synthesizedCircuits/130nm/sg13g2_stdcel
 
 clean
 
-write_verilog registersQueue.s.v
+write_verilog registersQueue.synth.v
 
 

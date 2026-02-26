@@ -1,0 +1,13 @@
+dffMatches:
+  - name: DFFRNQ_X1
+    clk: CLK
+    d: D
+    q: Q
+    reset: RN
+    resetActiveLow: true
+muxMatches:
+  - name: MUX2_X1
+    a: A
+    b: B
+    s: S
+    y: Z

@@ -9,6 +9,6 @@ dfflibmap -liberty ~/Desktop/ode4ec/faultTests/synthesizedCircuits/130nm/sg13g2_
 abc -liberty ~/Desktop/ode4ec/faultTests/synthesizedCircuits/130nm/sg13g2_stdcell_typ_1p20V_25C.lib
 
 clean
-write_verilog register.s.v
+write_verilog register.synth.v
 
 

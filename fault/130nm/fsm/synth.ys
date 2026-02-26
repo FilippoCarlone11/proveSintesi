@@ -13,6 +13,6 @@ abc -liberty ~/Desktop/ode4ec/faultTests/synthesizedCircuits/130nm/sg13g2_stdcel
 
 clean
 
-write_verilog fsm.s.v
+write_verilog fsm.synth.v
 
-show -format png -prefix synthetized_fsm_image fsm
+

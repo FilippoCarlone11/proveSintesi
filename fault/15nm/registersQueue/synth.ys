@@ -13,5 +13,5 @@ abc -liberty ~/Desktop/ode4ec/faultTests/synthesizedCircuits/15nm/NanGate_15nm_O
 
 clean
 
-write_verilog registersQueue.s.v
+write_verilog registersQueue.synth.v
 

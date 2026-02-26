@@ -1,0 +1,14 @@
+dffMatches:
+  - name: sg13g2_dfrbp_1
+    clk: CLK
+    d: D
+    q: Q
+    qn: Q_N
+    reset: RESET_B
+    resetActiveLow: true
+muxMatches:
+  - name: sg13g2_mux2_1
+    a: A0
+    b: A1
+    s: S
+    y: X
