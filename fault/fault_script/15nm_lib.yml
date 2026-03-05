@@ -3,8 +3,8 @@ dffMatches:
     clk: CLK
     d: D
     q: Q
-    reset: RN
-    resetActiveLow: true
+    #reset: RN
+    #resetActiveLow: true
 muxMatches:
   - name: MUX2_X1
     a: A

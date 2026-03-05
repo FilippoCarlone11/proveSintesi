@@ -54,12 +54,18 @@ else
     exit 1
 fi
 
+YAML_PATH="${SCRIPT_DIR}/${LIBRARY_CONFIG}"
+if [ ! -f "$YAML_PATH" ]; then
+    echo "ERRORE FATALE: Il file YAML '$YAML_PATH' non esiste!"
+    exit 1
+fi
+echo "Utilizzo file di configurazione YAML: $YAML_PATH"
+
 # --- 3. SCAN CHAIN INSERTION ---
 source "$VENV_PATH"
 echo "--- Scan Chain insertion ---"
 fault chain \
-    --clock clk --reset rst \
-    --activeLow \
+    --clock CK \
     -l "$LIBERTY_PATH" \
     -c "$VERILOG_LIB" \
     -s "${SCRIPT_DIR}/${LIBRARY_CONFIG}" \
@@ -72,6 +78,7 @@ deactivate
 # quindi controlliamo che il file .scan.v sia stato prodotto
 if [ -f "$SCAN_OUTPUT" ] && grep -q "Internal scan chain successfully constructed" "${CIRCUIT_DIR}/log/scan.log"; then
     echo "--- Scan Chain inserted ---"
+    sed -i "s/module ${CIRCUIT_BASENAME}\b/module ${CIRCUIT_BASENAME}_scan/" "$SCAN_OUTPUT" #cambio il nome del secondo modulo senno icarus crasha
 else
     echo "ERROR: Scan chain insertion failed. Check ${CIRCUIT_DIR}/log/scan.log"
     exit 1
@@ -93,3 +100,20 @@ if [ $? -ne 0 ]; then
 fi
 echo "--- Images Generated ---"
 echo "Success! All files generated in: $CIRCUIT_DIR"
+
+# --- 5. GENERAZIONE TESTBENCH E SIMULAZIONE ---
+TB_OUTPUT="${CIRCUIT_DIR}/${CIRCUIT_BASENAME}_tb_equiv.v"
+
+echo "--- Generazione Testbench Equivalenza ---"
+python3 "${SCRIPT_DIR}/generate_tb.py" "$INPUT_VERILOG" "$TB_OUTPUT"
+
+echo "--- Simulazione Icarus Verilog ---"
+# N.B. Assicurati che il percorso della libreria Verilog ($VERILOG_LIB) sia corretto per la simulazione
+iverilog -o "${CIRCUIT_DIR}/sim.vvp" "$TB_OUTPUT" "$SYNTH_OUTPUT" "$SCAN_OUTPUT" "$VERILOG_LIB"
+
+if [ $? -eq 0 ]; then
+    vvp "${CIRCUIT_DIR}/sim.vvp"
+else
+    echo "ERRORE: Compilazione Icarus Verilog fallita."
+fi
+
