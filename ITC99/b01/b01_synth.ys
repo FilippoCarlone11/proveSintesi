@@ -1,0 +1,7 @@
+read_verilog b01.v
+synth -top b01
+flatten
+dfflibmap -liberty /home/filippo/Desktop/ode4ec/proveSintesi/Syn_libraries/15nm/CCS/NanGate_15nm_OCL_typical_conditional_ccs.lib
+abc -liberty /home/filippo/Desktop/ode4ec/proveSintesi/Syn_libraries/15nm/CCS/NanGate_15nm_OCL_typical_conditional_ccs.lib
+clean
+write_verilog /home/filippo/Desktop/ode4ec/proveSintesi/ITC99/b01/b01.synth.v
