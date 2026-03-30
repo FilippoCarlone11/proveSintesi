@@ -2,7 +2,7 @@ import sys
 import re
 import os
 
-def parse_verilog(filepath, clk_name="clk", rst_name="rst"):
+def parse_verilog(filepath, clk_name="clock", rst_name="reset"):
     with open(filepath, 'r') as f:
         content = f.read()
 
@@ -47,7 +47,7 @@ def parse_verilog(filepath, clk_name="clk", rst_name="rst"):
 
     return module_name, inputs, outputs
 
-def generate_testbench(module_name, inputs, outputs, tb_path, clk_name="CK", rst_name="rst"):
+def generate_testbench(module_name, inputs, outputs, tb_path, clk_name="clock", rst_name="reset"):
     # Prepara le stringhe di mappatura dei pin
     golden_ports = f".{clk_name}({clk_name}), .{rst_name}({rst_name})"
     
@@ -174,5 +174,5 @@ if __name__ == "__main__":
     out_tb = sys.argv[2]
     
     # Assicuriamoci che usi "CK" come clock di default per i tuoi test con s27
-    mod_name, in_ports, out_ports = parse_verilog(in_verilog, clk_name="CK", rst_name="rst")
-    generate_testbench(mod_name, in_ports, out_ports, out_tb, clk_name="CK", rst_name="rst")
+    mod_name, in_ports, out_ports = parse_verilog(in_verilog, clk_name="clock", rst_name="reset")
+    generate_testbench(mod_name, in_ports, out_ports, out_tb, clk_name="clock", rst_name="reset")

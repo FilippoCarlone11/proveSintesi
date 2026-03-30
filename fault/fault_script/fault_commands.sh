@@ -65,7 +65,8 @@ echo "Utilizzo file di configurazione YAML: $YAML_PATH"
 source "$VENV_PATH"
 echo "--- Scan Chain insertion ---"
 fault chain \
-    --clock CK \
+    --clock clock \
+    --reset reset \
     -l "$LIBERTY_PATH" \
     -c "$VERILOG_LIB" \
     -s "${SCRIPT_DIR}/${LIBRARY_CONFIG}" \
