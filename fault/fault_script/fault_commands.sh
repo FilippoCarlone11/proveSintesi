@@ -102,18 +102,20 @@ fi
 rm -f "${CIRCUIT_DIR}"/*-intermediate.v "${CIRCUIT_DIR}"/*.attrs "${CIRCUIT_DIR}"/*+attrs "${CIRCUIT_DIR}"/*.out "${CIRCUIT_DIR}"/*.py "${CIRCUIT_DIR}"/*tb.v "${CIRCUIT_DIR}"/*.sv "${CIRCUIT_DIR}"/*.log 
 
 # --- 4. IMAGE GENERATION ---
-echo "--- Images Generation ---"
-yosys -p "read_verilog ${SCAN_OUTPUT}; hierarchy -auto-top; proc; show -format png -prefix img/${CIRCUIT_BASENAME}_scan" &> log/img_scan.log
-if [ $? -ne 0 ]; then
-    echo "WARNING: Image generation for scan netlist failed. Check ${CIRCUIT_DIR}/log/img_scan.log"
-fi
+if [ $3 -ne 0 ]; then
+    echo "--- Images Generation ---"
+    yosys -p "read_verilog ${SCAN_OUTPUT}; hierarchy -auto-top; proc; show -format png -prefix img/${CIRCUIT_BASENAME}_scan" &> log/img_scan.log
+    if [ $? -ne 0 ]; then
+        echo "WARNING: Image generation for scan netlist failed. Check ${CIRCUIT_DIR}/log/img_scan.log"
+    fi
 
-yosys -p "read_verilog ${SYNTH_OUTPUT}; hierarchy -auto-top; proc; show -format png -prefix img/${CIRCUIT_BASENAME}_synth" &> log/img_synth.log
-if [ $? -ne 0 ]; then
-    echo "WARNING: Image generation for synth netlist failed. Check ${CIRCUIT_DIR}/log/img_synth.log"
+    yosys -p "read_verilog ${SYNTH_OUTPUT}; hierarchy -auto-top; proc; show -format png -prefix img/${CIRCUIT_BASENAME}_synth" &> log/img_synth.log
+    if [ $? -ne 0 ]; then
+        echo "WARNING: Image generation for synth netlist failed. Check ${CIRCUIT_DIR}/log/img_synth.log"
+    fi
+    echo "--- Images Generated ---"
+    echo "Success! All files generated in: $CIRCUIT_DIR"
 fi
-echo "--- Images Generated ---"
-echo "Success! All files generated in: $CIRCUIT_DIR"
 
 # --- 5. GENERAZIONE TESTBENCH E SIMULAZIONE ---
 TB_OUTPUT="${CIRCUIT_DIR}/${CIRCUIT_BASENAME}_tb_equiv.v"

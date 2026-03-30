@@ -1,2 +1,10 @@
 config.cfg
 *.swp
+*.scan.v*
+*.synth.v*
+*_tb_equiv.v*
+*_synth.ys
+img/
+log/
+*.vcd
+*.vvp
