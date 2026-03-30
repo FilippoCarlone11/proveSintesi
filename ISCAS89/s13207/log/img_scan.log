@@ -1,0 +1,71 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2025  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.58+35 (git sha1 9a12d9255, clang++ 18.1.3 -fPIC -O3)
+
+-- Running command `read_verilog /home/filippo/Desktop/ode4ec/proveSintesi/fault/ISCAS89/s13207/s13207.scan.v; hierarchy -auto-top; proc; show -format png -prefix img/s13207_scan' --
+
+1. Executing Verilog-2005 frontend: /home/filippo/Desktop/ode4ec/proveSintesi/fault/ISCAS89/s13207/s13207.scan.v
+Parsing Verilog input from `/home/filippo/Desktop/ode4ec/proveSintesi/fault/ISCAS89/s13207/s13207.scan.v' to AST representation.
+verilog frontend filename /home/filippo/Desktop/ode4ec/proveSintesi/fault/ISCAS89/s13207/s13207.scan.v
+Generating RTLIL representation for module `\s13207_scan'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Finding top of design hierarchy..
+root of   0 design levels: s13207_scan         
+Automatically selected s13207_scan as design top module.
+
+2.2. Analyzing design hierarchy..
+Top module:  \s13207_scan
+
+2.3. Analyzing design hierarchy..
+Top module:  \s13207_scan
+Removed 0 unused modules.
+
+3. Executing PROC pass (convert processes to netlists).
+
+3.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+3.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 0 assignments to connections.
+
+3.4. Executing PROC_INIT pass (extract init attributes).
+
+3.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+3.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+
+3.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+3.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+3.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module s13207_scan.
+
+4. Generating Graphviz representation of design.
+dot: graph is too large for cairo-renderer bitmaps. Scaling by 0.0736927 to fit
+Writing dot description to `img/s13207_scan.dot'.
+Dumping module s13207_scan to page 1.
+Exec: dot -Tpng 'img/s13207_scan.dot' > 'img/s13207_scan.png.new' && mv 'img/s13207_scan.png.new' 'img/s13207_scan.png'
+
+End of script. Logfile hash: abff488e2e, CPU: user 0.19s system 0.01s, MEM: 40.09 MB peak
+Yosys 0.58+35 (git sha1 9a12d9255, clang++ 18.1.3 -fPIC -O3)
+Time spent: 99% 1x show (44 sec), 0% 2x read_verilog (0 sec), ...
