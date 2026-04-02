@@ -1,2 +1,15 @@
 config.cfg
 *.swp
+thr*/
+log/
+img/
+
+*.vvp
+*.vcd
+*.log
+
+**/thx*/
+**/thr*/
+**/*.vvp
+**/*.vcd
+**/*.log

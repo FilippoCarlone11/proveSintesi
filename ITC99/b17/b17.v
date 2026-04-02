@@ -1,7 +1,7 @@
-module b15(BE_n, Address, W_R_n, D_C_n, M_IO_n, ADS_n, Datai, Datao, CLOCK, NA_n, BS16_n, READY_n, HOLD, RESET);
+module b15(BE_n, Address, W_R_n, D_C_n, M_IO_n, ADS_n, Datai, Datao, CLOCK, NA_n, BS16_n, READY_n, HOLD, reset);
 
 input CLOCK;
-input RESET;
+input reset;
 input NA_n;
 input BS16_n;
 input READY_n;
@@ -124,8 +124,8 @@ reg [3:0] State2;
 
 reg [8*31:1] string_value; 
 
-always @(posedge CLOCK, posedge RESET) begin//added reset
-    if(RESET == 1'b1) begin
+always @(posedge CLOCK, posedge reset) begin//added reset
+    if(reset == 1'b1) begin
 		BE_n <= 4'b0000;
 		Address <= 0;
 		W_R_n <= 1'b0;
@@ -295,10 +295,10 @@ always @(posedge CLOCK, posedge RESET) begin//added reset
 	end
 end
 integer i;
-always @(posedge CLOCK, posedge RESET) begin //: P1
+always @(posedge CLOCK, posedge reset) begin //: P1
 	
 	
-    if(RESET == 1'b1) begin
+    if(reset == 1'b1) begin
 		State2 = Si;
 		//InstQueue := (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 		for(i = 0; i<queue_size; i =i +1) begin
@@ -723,8 +723,8 @@ always @(posedge CLOCK, posedge RESET) begin //: P1
 	end
 end
 
-always @(posedge CLOCK, posedge RESET) begin
-    if(RESET == 1'b1) begin
+always @(posedge CLOCK, posedge reset) begin
+    if(reset == 1'b1) begin
 		ByteEnable <= 4'b0000;
 		NonAligned <= 1'b0;
 		end else begin
@@ -808,7 +808,7 @@ endmodule
 
 
 module b17(clock, reset, datai, datao, hold, na, bs16, address1, address2, wr, dc, mio, ast1,ast2, ready1, ready2);
-//module b15(BE_n, Address, W_R_n, D_C_n, M_IO_n, ADS_n, Datai, Datao, CLOCK, NA_n, BS16_n, READY_n, HOLD, RESET);
+//module b15(BE_n, Address, W_R_n, D_C_n, M_IO_n, ADS_n, Datai, Datao, CLOCK, NA_n, BS16_n, READY_n, HOLD, reset);
 
 	input clock;
 	input reset;

@@ -1,17 +1,7 @@
-
-read_verilog b01.v
-hierarchy -check -top b01
-synth -top b01
-
-splitnets -ports
-opt_clean -purge
-
+read_verilog b15.v
+synth -top b15
+flatten
 dfflibmap -liberty /home/filippo/Desktop/ode4ec/proveSintesi/Syn_libraries/15nm/CCS/NanGate_15nm_OCL_typical_conditional_ccs.lib
 abc -liberty /home/filippo/Desktop/ode4ec/proveSintesi/Syn_libraries/15nm/CCS/NanGate_15nm_OCL_typical_conditional_ccs.lib
-
-flatten
-setundef -zero
-clean -purge
-
-write_verilog /home/filippo/Desktop/ode4ec/proveSintesi/ITC99/b01/b01.synth.v
-
+clean
+write_verilog /home/filippo/Desktop/ode4ec/proveSintesi/ITC99/b15/b15.synth.v

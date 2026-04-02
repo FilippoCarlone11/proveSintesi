@@ -96,13 +96,13 @@ module tb_equiv;
         {scan_ports}
     );
 
-    // Generazione Clock Principale
+    // Generazione clock Principale
     initial begin
         {clk_name} = 0;
         forever #5 {clk_name} = ~{clk_name};
     end
 
-    // Generazione Test Clock (tck)
+    // Generazione Test clock (tck)
     initial begin
         tck = 0;
         forever #7 tck = ~tck;
@@ -118,7 +118,7 @@ module tb_equiv;
         test = 0;
         shift = 0;
         sin = 0;
-        {rst_name} = 0; // Reset Active Low
+        {rst_name} = 0; // reset Active Low
 """
     for pin in inputs:
         tb_code += f"        {pin} = 0;\n"
@@ -129,7 +129,7 @@ module tb_equiv;
         #10;
 
         // Inietta 1000 input casuali
-        repeat(1000) begin
+        repeat(20000) begin
             @(negedge {clk_name});
 """
     for pin in inputs:

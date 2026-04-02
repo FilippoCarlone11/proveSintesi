@@ -14,33 +14,34 @@ module tb_equiv;
     wire sout;
 
     // --- INGRESSI FUNZIONALI ---
-    reg line1;
-    reg line2;
+    reg si;
 
     // --- USCITE GOLDEN E SCAN --- 
-    wire outp;
-    wire outp_scan;
-    wire overflw;
-    wire overflw_scan;
+    wire so;
+    wire so_scan;
+    wire rd;
+    wire rd_scan;
+    wire wr;
+    wire wr_scan;
 
     // --- ISTANZA GOLDEN (Circuito Sintetizzato) ---
-    b01 inst_golden (
-        .clock(clock), .reset(reset), .line1(line1), .line2(line2), .outp(outp), .overflw(overflw)
+    b22 inst_golden (
+        .clock(clock), .reset(reset), .si(si), .so(so), .rd(rd), .wr(wr)
     );
 
     // --- ISTANZA SCAN (Circuito con Chain) ---
     // Aggiunto suffisso _scan in modo da allinearsi con il comando sed di bash
-    b01_scan inst_scan (
-        .clock(clock), .reset(reset), .test(test), .shift(shift), .tck(tck), .sin(sin), .sout(sout), .line1(line1), .line2(line2), .outp(outp_scan), .overflw(overflw_scan)
+    b22_scan inst_scan (
+        .clock(clock), .reset(reset), .test(test), .shift(shift), .tck(tck), .sin(sin), .sout(sout), .si(si), .so(so_scan), .rd(rd_scan), .wr(wr_scan)
     );
 
-    // Generazione clock Principale
+    // Generazione Clock Principale
     initial begin
         clock = 0;
         forever #5 clock = ~clock;
     end
 
-    // Generazione Test clock (tck)
+    // Generazione Test Clock (tck)
     initial begin
         tck = 0;
         forever #7 tck = ~tck;
@@ -56,19 +57,17 @@ module tb_equiv;
         test = 0;
         shift = 0;
         sin = 0;
-        reset = 0; // reset Active Low
-        line1 = 0;
-        line2 = 0;
+        reset = 0; // Reset Active Low
+        si = 0;
 
         #20;
         reset = 1; // Rilascia il reset
         #10;
 
         // Inietta 1000 input casuali
-        repeat(20000) begin
+        repeat(1000) begin
             @(negedge clock);
-            line1 = $random;
-            line2 = $random;
+            si = $random;
         end
 
         $display("\n==============================================");
@@ -81,10 +80,11 @@ module tb_equiv;
     always @(posedge clock) begin
         if (reset == 1) begin
             #1; // Delay di propagazione
-            if ((outp !== outp_scan) || (overflw !== overflw_scan)) begin
+            if ((so !== so_scan) || (rd !== rd_scan) || (wr !== wr_scan)) begin
                 $display("\n[!] ERROR: Discrepanza trovata al tempo %0t!", $time);
-                $display(" -> outp (Golden: %b, Scan: %b)", outp, outp_scan);
-                $display(" -> overflw (Golden: %b, Scan: %b)", overflw, overflw_scan);
+                $display(" -> so (Golden: %b, Scan: %b)", so, so_scan);
+                $display(" -> rd (Golden: %b, Scan: %b)", rd, rd_scan);
+                $display(" -> wr (Golden: %b, Scan: %b)", wr, wr_scan);
                 $stop;
             end
         end

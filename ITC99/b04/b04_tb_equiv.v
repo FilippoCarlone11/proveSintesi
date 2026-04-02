@@ -3,8 +3,8 @@
 module tb_equiv;
 
     // --- SEGNALI DI CONTROLLO BASE ---
-    reg clock;
-    reg reset;
+    reg CLOCK;
+    reg RESET;
 
     // --- SEGNALI DI CONTROLLO FAULT SCAN CHAIN ---
     reg test;
@@ -14,33 +14,33 @@ module tb_equiv;
     wire sout;
 
     // --- INGRESSI FUNZIONALI ---
-    reg line1;
-    reg line2;
+    reg RESTART;
+    reg AVERAGE;
+    reg ENABLE;
+    reg DATA_IN;
 
     // --- USCITE GOLDEN E SCAN --- 
-    wire outp;
-    wire outp_scan;
-    wire overflw;
-    wire overflw_scan;
+    wire DATA_OUT;
+    wire DATA_OUT_scan;
 
     // --- ISTANZA GOLDEN (Circuito Sintetizzato) ---
-    b01 inst_golden (
-        .clock(clock), .reset(reset), .line1(line1), .line2(line2), .outp(outp), .overflw(overflw)
+    b04 inst_golden (
+        .CLOCK(CLOCK), .RESET(RESET), .RESTART(RESTART), .AVERAGE(AVERAGE), .ENABLE(ENABLE), .DATA_IN(DATA_IN), .DATA_OUT(DATA_OUT)
     );
 
     // --- ISTANZA SCAN (Circuito con Chain) ---
     // Aggiunto suffisso _scan in modo da allinearsi con il comando sed di bash
-    b01_scan inst_scan (
-        .clock(clock), .reset(reset), .test(test), .shift(shift), .tck(tck), .sin(sin), .sout(sout), .line1(line1), .line2(line2), .outp(outp_scan), .overflw(overflw_scan)
+    b04_scan inst_scan (
+        .CLOCK(CLOCK), .RESET(RESET), .test(test), .shift(shift), .tck(tck), .sin(sin), .sout(sout), .RESTART(RESTART), .AVERAGE(AVERAGE), .ENABLE(ENABLE), .DATA_IN(DATA_IN), .DATA_OUT(DATA_OUT_scan)
     );
 
-    // Generazione clock Principale
+    // Generazione Clock Principale
     initial begin
-        clock = 0;
-        forever #5 clock = ~clock;
+        CLOCK = 0;
+        forever #5 CLOCK = ~CLOCK;
     end
 
-    // Generazione Test clock (tck)
+    // Generazione Test Clock (tck)
     initial begin
         tck = 0;
         forever #7 tck = ~tck;
@@ -56,19 +56,23 @@ module tb_equiv;
         test = 0;
         shift = 0;
         sin = 0;
-        reset = 0; // reset Active Low
-        line1 = 0;
-        line2 = 0;
+        RESET = 0; // Reset Active Low
+        RESTART = 0;
+        AVERAGE = 0;
+        ENABLE = 0;
+        DATA_IN = 0;
 
         #20;
-        reset = 1; // Rilascia il reset
+        RESET = 1; // Rilascia il reset
         #10;
 
         // Inietta 1000 input casuali
-        repeat(20000) begin
-            @(negedge clock);
-            line1 = $random;
-            line2 = $random;
+        repeat(1000) begin
+            @(negedge CLOCK);
+            RESTART = $random;
+            AVERAGE = $random;
+            ENABLE = $random;
+            DATA_IN = $random;
         end
 
         $display("\n==============================================");
@@ -78,13 +82,12 @@ module tb_equiv;
     end
 
     // Monitoraggio Equivalenza
-    always @(posedge clock) begin
-        if (reset == 1) begin
+    always @(posedge CLOCK) begin
+        if (RESET == 1) begin
             #1; // Delay di propagazione
-            if ((outp !== outp_scan) || (overflw !== overflw_scan)) begin
+            if ((DATA_OUT !== DATA_OUT_scan)) begin
                 $display("\n[!] ERROR: Discrepanza trovata al tempo %0t!", $time);
-                $display(" -> outp (Golden: %b, Scan: %b)", outp, outp_scan);
-                $display(" -> overflw (Golden: %b, Scan: %b)", overflw, overflw_scan);
+                $display(" -> DATA_OUT (Golden: %b, Scan: %b)", DATA_OUT, DATA_OUT_scan);
                 $stop;
             end
         end
