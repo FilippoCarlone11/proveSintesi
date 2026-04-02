@@ -6,7 +6,7 @@
  \----------------------------------------------------------------------------/
  Yosys 0.57+263 (git sha1 637665c9d, g++ 13.3.0-6ubuntu2~24.04 -fPIC -O3)
 
--- Executing script file `/home/bellee21/progettoEDA/proveSintesi/ITC99/b01/b01_synth.ys' --
+-- Executing script file `/home/bellee21/progettoEDA/proveSintesi/ITC99/b01/b01.ys' --
 
 1. Executing Verilog-2005 frontend: /home/bellee21/progettoEDA/proveSintesi/ITC99/b01/b01.v
 Parsing Verilog input from `/home/bellee21/progettoEDA/proveSintesi/ITC99/b01/b01.v' to AST representation.
@@ -555,7 +555,7 @@ ABC: UC Berkeley, ABC 1.01 (compiled Oct  4 2025 16:38:49)
 ABC: abc 01> empty
 ABC: abc 01> source <abc-temp-dir>/abc.script
 ABC: + read_blif <abc-temp-dir>/input.blif 
-ABC: + read_library /tmp/yosys-abc-hIwvLb/stdcells.genlib 
+ABC: + read_library /tmp/yosys-abc-PFzlwx/stdcells.genlib 
 ABC: + strash 
 ABC: + dretime 
 ABC: + map 
@@ -684,7 +684,7 @@ ABC: abc 01> empty
 ABC: abc 01> source <abc-temp-dir>/abc.script
 ABC: + read_blif <abc-temp-dir>/input.blif 
 ABC: + read_lib -w /home/bellee21/progettoEDA/proveSintesi/Syn_libraries/15nm/CCS/NanGate_15nm_OCL_typical_conditional_ccs.lib 
-ABC: Parsing finished successfully.  Parsing time =     0.76 sec
+ABC: Parsing finished successfully.  Parsing time =     0.79 sec
 ABC: Scl_LibertyReadGenlib() skipped cell "ANTENNA" due to dont_use attribute.
 ABC: Scl_LibertyReadGenlib() skipped cell "CLKGATETST_X1" without logic function.
 ABC: Scl_LibertyReadGenlib() skipped sequential cell "DFFRNQ_X1".
@@ -706,8 +706,8 @@ ABC: Scl_LibertyReadGenlib() skipped three-state cell "TBUF_X12".
 ABC: Scl_LibertyReadGenlib() skipped three-state cell "TBUF_X16".
 ABC: Scl_LibertyReadGenlib() skipped cell "TIEH" due to dont_use attribute.
 ABC: Scl_LibertyReadGenlib() skipped cell "TIEL" due to dont_use attribute.
-ABC: Library "NanGate_15nm_OCL" from "/home/bellee21/progettoEDA/proveSintesi/Syn_libraries/15nm/CCS/NanGate_15nm_OCL_typical_conditional_ccs.lib" has 55 cells (21 skipped: 5 seq; 6 tri-state; 1 no func; 9 dont_use; 0 with 2 outputs; 0 with 3+ outputs).  Time =     0.78 sec
-ABC: Memory =  176.75 MB. Time =     0.78 sec
+ABC: Library "NanGate_15nm_OCL" from "/home/bellee21/progettoEDA/proveSintesi/Syn_libraries/15nm/CCS/NanGate_15nm_OCL_typical_conditional_ccs.lib" has 55 cells (21 skipped: 5 seq; 6 tri-state; 1 no func; 9 dont_use; 0 with 2 outputs; 0 with 3+ outputs).  Time =     0.80 sec
+ABC: Memory =  176.75 MB. Time =     0.80 sec
 ABC: Warning: Detected 2 multi-output cells (for example, "FA_X1").
 ABC: + strash 
 ABC: + &get -n 
@@ -754,6 +754,6 @@ Removed 0 unused cells and 57 unused wires.
 10.2. Executing DEMUXMAP pass.
 Dumping module `\b01'.
 
-End of script. Logfile hash: 3f9a2ca039, CPU: user 0.75s system 0.11s, MEM: 314.27 MB peak
+End of script. Logfile hash: 44509ae751, CPU: user 0.77s system 0.09s, MEM: 314.63 MB peak
 Yosys 0.57+263 (git sha1 637665c9d, g++ 13.3.0-6ubuntu2~24.04 -fPIC -O3)
-Time spent: 67% 2x abc (1 sec), 29% 1x dfflibmap (0 sec), ...
+Time spent: 66% 2x abc (1 sec), 30% 1x dfflibmap (0 sec), ...

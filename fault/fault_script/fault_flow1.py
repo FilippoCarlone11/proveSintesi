@@ -37,7 +37,7 @@ def clear_workspace(target_dir):
 
     # elimino tutti i file che hanno i suffissi nella tabella( file che sono stati creati a runtime )
     suffixes_to_remove = [
-        '.synth.v', '.scan.v', '.cut.v', '.bench', '_synth.ys', 
+        '.synth.v', '.vec', '.scan.v', '.cut.v', '.bench', '_synth.ys', 
         '_tb_equiv.v', '.test', 'sim.vvp', '.sv', '.out', '.py', '.vcd', '.v+attributes', '.v+attrs','.chain-intermediate.v', '.log', '.ys'
     ]
     
@@ -56,6 +56,8 @@ def clear_workspace(target_dir):
 # risolvendo anche variabili annidate
 def load_config(file_path):
     
+    in_multiline_comment = False
+
     config = {}
     #controllo che esista
     if not file_path.exists():
@@ -145,6 +147,7 @@ def atalanta(circuit_dir, test_patterns, bench_output):
 
 #funzione che genera il file yosys
 def yosys_script_generation(yosys_script, input_verilog, basename, liberty_path, synth_output):
+    print("--- 1. Generazione script Yosys ---")
     ys_content = f"""read_verilog {input_verilog}
         hierarchy -check -top {basename}
         synth -top {basename}
@@ -261,7 +264,21 @@ def main():
         (circuit_dir / "img").mkdir(exist_ok=True)
 
     #carico il file di config 
-    cfg = load_config("config.cfg")
+    cfg = load_config(script_dir / "config.cfg")
+
+    # attivo l'ambiente virtuale
+    venv_activate_path = cfg.get("VENV_PATH")
+    if venv_activate_path:
+        #prende la cartella 'bin' togliendo '/activate' dal percorso
+        venv_bin_dir = os.path.dirname(venv_activate_path)
+        
+        # inserisce la cartella di Fault in cima al PATH del terminale virtuale
+        # da adesso tutto viene seguito nel virtuale
+        os.environ["PATH"] = f"{venv_bin_dir}:{os.environ.get('PATH', '')}"
+        
+        # (Opzionale ma pulito) segnala ai tool che siamo in un venv
+        os.environ["VIRTUAL_ENV"] = os.path.dirname(venv_bin_dir)
+
 
     #fase in cui comprendo la libreria da usare
     if args.node == "15nm":
@@ -309,7 +326,7 @@ def main():
     bench(bench_output, liberty_path, cut_output, circuit_dir)
 
     # 8: ATPG con atalanta
-    atpg_gen(bench_output, args)
+    atpg_gen(bench_output, args, circuit_dir, test_patterns)
 
 if __name__ == "__main__":
     main()
