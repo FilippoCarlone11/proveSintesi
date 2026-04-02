@@ -163,6 +163,11 @@ def tb_n_sim(script_dir, input_verilog, tb_output, circuit_dir, synth_output, sc
     run_cmd(["iverilog", "-o", str(circuit_dir / "sim.vvp"), str(tb_output), str(synth_output), str(scan_output), verilog_lib], circuit_dir / "log/iverilog.log")
     run_cmd(["vvp", str(circuit_dir / "sim.vvp")], circuit_dir / "log/vvp.log")
 
+def cut_insertion(cut_output ,yaml_path, args, scan_output, circuit_dir):
+    print("--- 6. Cut Insertion ---")
+    run_cmd(["fault", "cut", "--scl-config", str(yaml_path), "--clock", args.clock,
+             "-o", str(cut_output), str(scan_output)], circuit_dir / "log/cut.log")
+
 def main():
 
     # arguments parsing
@@ -242,3 +247,8 @@ def main():
 
     # 5 : testbench e simulazione
     tb_n_sim(script_dir, input_verilog, tb_output, circuit_dir, synth_output, scan_output, verilog_lib)
+
+    # 6: Cut insertion
+    cut_insertion(cut_output ,yaml_path, args, scan_output, circuit_dir)
+
+    
