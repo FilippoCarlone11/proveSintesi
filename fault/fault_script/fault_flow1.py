@@ -105,6 +105,41 @@ def load_config(file_path):
                     config[key] = val
     return config
 
+#funzione che tenta l'esecuzione più volte di atalanta e nel caso fallisce per colpa di segnali pendenti
+# li attacca come output
+def atalanta(circuit_dir, test_patterns, bench_output):
+    max_retries = 10
+    success = False
+    
+    #ciclo per x volte
+    for attempt in range(1, max_retries + 1):
+        log_path = circuit_dir / "log/atalanta.log"
+        ret_code = run_cmd(["atalanta", "-t", str(test_patterns), str(bench_output)], log_path, exit_on_fail=False)
+        
+        log_content = log_path.read_text()
+        
+        # Regex per trovare l'errore "floating net" o "floating output"
+        match = re.search(r"floating (?:net|output) ['\"]?([\w\.\[\]_]+)['\"]?", log_content, re.IGNORECASE)
+        
+        if match:
+            # caso in cui trovo un errore: ricavo il segnale e lo metto come output
+            bad_net = match.group(1)
+            print(f"-> [Tentativo {attempt}] Trovato nodo fluttuante: {bad_net}. Applico la patch...")
+            with open(bench_output, "a") as f:
+                f.write(f"OUTPUT({bad_net})\n")
+        elif ret_code == 0 and test_patterns.exists():
+            success = True
+            break
+        else:
+            print("ERRORE: Atalanta ha fallito per un motivo sconosciuto.")
+            break
+
+    if success:
+        print(f"=== SUCCESSO! Atalanta ha terminato in {attempt} tentativi ===")
+        print(f"I test pattern sono in: {test_patterns}")
+    else:
+        print(f"ERRORE FATALE: Atalanta non è riuscito a processare il file. Controlla {log_path}")
+        sys.exit(1)
 
 """ FUNZIONI PER IL TOOL """
 
@@ -163,15 +198,28 @@ def tb_n_sim(script_dir, input_verilog, tb_output, circuit_dir, synth_output, sc
     run_cmd(["iverilog", "-o", str(circuit_dir / "sim.vvp"), str(tb_output), str(synth_output), str(scan_output), verilog_lib], circuit_dir / "log/iverilog.log")
     run_cmd(["vvp", str(circuit_dir / "sim.vvp")], circuit_dir / "log/vvp.log")
 
+# funzione che esegue la cut insertion
 def cut_insertion(cut_output ,yaml_path, args, scan_output, circuit_dir):
     print("--- 6. Cut Insertion ---")
     run_cmd(["fault", "cut", "--scl-config", str(yaml_path), "--clock", args.clock,
              "-o", str(cut_output), str(scan_output)], circuit_dir / "log/cut.log")
 
+# funzione che genera il file bench per atalanta
 def bench(bench_output, liberty_path, cut_output, circuit_dir):
     print("--- 7. Bench Generation ---")
     run_cmd(["nl2bench", "-o", str(bench_output), "-l", liberty_path, str(cut_output)], circuit_dir / "log/bench.log")
 
+# funzione che genera i test tramite atalanta
+def atpg_gen(bench_output, args, circuit_dir, test_patterns):
+    
+    print("--- 8. Atalanta Standalone (Auto-Patching) ---")
+    # attacco nel bench come output il clock ed il reset perchè non devono
+    # esserci segnali pendenti
+    with open(bench_output, "a") as f:
+        f.write(f"\nOUTPUT({args.clock})\nOUTPUT({args.reset})\nOUTPUT(__uuf__.__clk_source__)\n")
+
+    # utilizzo atalanta
+    atalanta(circuit_dir, test_patterns, bench_output)
 
 def main():
 
@@ -258,3 +306,6 @@ def main():
 
     # 7 creazione bench
     bench(bench_output, liberty_path, cut_output, circuit_dir)
+
+    # 8: ATPG con atalanta
+    atpg_gen(bench_output, args)
