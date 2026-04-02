@@ -8,6 +8,7 @@ import re
 import shutil
 from pathlib import Path
 
+""" FUNZIONI UTILI"""
 
 #funzione per eseguire comandi shell usando subprocess.run
 def run_cmd(cmd, log_file, cwd=None, exit_on_fail=True):
@@ -22,30 +23,6 @@ def run_cmd(cmd, log_file, cwd=None, exit_on_fail=True):
         print(f"ERRORE: Comando fallito. Controlla {log_file}")
         sys.exit(1)
     return result.returncode
-
-
-#funzione che genera il file yosys
-def yosys_script_generation(yosys_script, input_verilog, basename, liberty_path, synth_output):
-    ys_content = f"""read_verilog {input_verilog}
-        hierarchy -check -top {basename}
-        synth -top {basename}
-        splitnets -ports
-        opt_clean -purge
-        dfflibmap -liberty {liberty_path}
-        abc -liberty {liberty_path}
-        flatten
-        setundef -zero
-        clean -purge
-        write_verilog {synth_output}
-        """
-    #scrivo
-    with open(yosys_script, "w") as f:
-        f.write(ys_content)
-
-#funzione che esegue la sintesi
-def synthesys(yosys_script, circuit_dir): 
-    print("--- 2. Sintesi Yosys ---")
-    run_cmd(["yosys", "-s", str(yosys_script)], circuit_dir / "log/synthesis.log")
 
 # funzione che pulisce tutti quant i file 
 def clear_workspace(target_dir):
@@ -76,10 +53,35 @@ def clear_workspace(target_dir):
     print(f"--- Pulizia Completata ({count} file rimossi) ---")
 
 
+""" FUNZIONI PER IL TOOL """
 
+#funzione che genera il file yosys
+def yosys_script_generation(yosys_script, input_verilog, basename, liberty_path, synth_output):
+    ys_content = f"""read_verilog {input_verilog}
+        hierarchy -check -top {basename}
+        synth -top {basename}
+        splitnets -ports
+        opt_clean -purge
+        dfflibmap -liberty {liberty_path}
+        abc -liberty {liberty_path}
+        flatten
+        setundef -zero
+        clean -purge
+        write_verilog {synth_output}
+        """
+    #scrivo
+    with open(yosys_script, "w") as f:
+        f.write(ys_content)
+
+#funzione che esegue la sintesi
+def synthesys(yosys_script, circuit_dir): 
+    print("--- 2. Sintesi Yosys ---")
+    run_cmd(["yosys", "-s", str(yosys_script)], circuit_dir / "log/synthesis.log")
+
+# funzione che legge il file config e ritorna un dizionario con nome variabile contenuto
+# risolvendo anche variabili annidate
 def load_config(file_path):
     
-    """Legge il file config.cfg e risolve le variabili al suo interno (es. ${VAR})."""
     config = {}
     #controllo che esista
     if not file_path.exists():
