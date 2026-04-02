@@ -168,6 +168,11 @@ def cut_insertion(cut_output ,yaml_path, args, scan_output, circuit_dir):
     run_cmd(["fault", "cut", "--scl-config", str(yaml_path), "--clock", args.clock,
              "-o", str(cut_output), str(scan_output)], circuit_dir / "log/cut.log")
 
+def bench(bench_output, liberty_path, cut_output, circuit_dir):
+    print("--- 7. Bench Generation ---")
+    run_cmd(["nl2bench", "-o", str(bench_output), "-l", liberty_path, str(cut_output)], circuit_dir / "log/bench.log")
+
+
 def main():
 
     # arguments parsing
@@ -251,4 +256,5 @@ def main():
     # 6: Cut insertion
     cut_insertion(cut_output ,yaml_path, args, scan_output, circuit_dir)
 
-    
+    # 7 creazione bench
+    bench(bench_output, liberty_path, cut_output, circuit_dir)
