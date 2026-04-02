@@ -1,3 +1,14 @@
+#!/usr/bin/env python3
+
+import argparse
+import subprocess
+import sys
+import os
+import re
+import shutil
+from pathlib import Path
+
+#funzione che genera il file yosys
 def yosys_script_generation(yosys_script, input_verilog, basename, liberty_path, synth_output):
     ys_content = f"""read_verilog {input_verilog}
         hierarchy -check -top {basename}
@@ -11,11 +22,37 @@ def yosys_script_generation(yosys_script, input_verilog, basename, liberty_path,
         clean -purge
         write_verilog {synth_output}
         """
+    #scrivo
     with open(yosys_script, "w") as f:
         f.write(ys_content)
 
-def clear_workspace():
+# funzione che pulisce tutti quant i file 
+def clear_workspace(target_dir):
+    print(f"--- Pulizia Workspace in {target_dir.name} ---")
+    
+    # elimino le cartelle log e img con tutto il contenuto
+    for folder in ['log', 'img']:
+        d = target_dir / folder
+        if d.exists() and d.is_dir():
+            shutil.rmtree(d)
+            print(f"Rimossa cartella: {folder}/")
 
+    # elimino tutti i file che hanno i suffissi nella tabella( file che sono stati creati a runtime )
+    suffixes_to_remove = [
+        '.synth.v', '.scan.v', '.cut.v', '.bench', '_synth.ys', 
+        '_tb_equiv.v', '.test', 'sim.vvp', '.sv', '.out', '.py', '.vcd', '.v+attributes', '.v+attrs','.chain-intermediate.v', '.log', '.ys'
+    ]
+    
+    count = 0
+    for f in target_dir.iterdir():
+        if f.is_file():
+            # Controlla se la fine del file corrisponde a uno dei nostri suffissi spazzatura
+            if any(f.name.endswith(suffix) for suffix in suffixes_to_remove):
+                f.unlink()
+                print(f"Rimosso: {f.name}")
+                count += 1
+                
+    print(f"--- Pulizia Completata ({count} file rimossi) ---")
 
 
 
@@ -45,6 +82,8 @@ def load_config(file_path):
 def main():
 
     # arguments parsing
+    # serve per capire cosa il codice si aspetta in input fa il controllo che sia stato messo l input giusto
+    # e da anche la funzione help
     parser = argparse.ArgumentParser(description="DFT Flow Automation Script")
     
     parser.add_argument("node", nargs="?", choices=["15nm", "130nm"], help="Technology node")
@@ -57,11 +96,6 @@ def main():
     
     args = parser.parse_args()
 
-    # clear option
-    if args.clear:
-        clear_workspace(circuit_dir, basename)
-        sys.exit(0)
-
     #input handling
     if not args.node or not args.input_verilog:
         parser.error("I parametri 'node' e 'input_verilog' sono obbligatori per l'esecuzione normale.")
@@ -71,6 +105,12 @@ def main():
     input_verilog = Path(args.input_verilog).resolve()
     circuit_dir = input_verilog.parent
     basename = input_verilog.stem
+
+    # pulisco tutti i file se richiesto in input
+    if args.clear:
+        clear_workspace(circuit_dir)
+        sys.exit(0)
+
 
     # directory generation
     (circuit_dir / "log").mkdir(exist_ok=True)

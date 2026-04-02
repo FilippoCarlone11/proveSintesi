@@ -1,7 +1,11 @@
-read_verilog b01.v
+read_verilog /home/bellee21/progettoEDA/proveSintesi/ITC99/b01/b01.v
+hierarchy -check -top b01
 synth -top b01
+splitnets -ports
+opt_clean -purge
+dfflibmap -liberty /home/bellee21/progettoEDA/proveSintesi/Syn_libraries/15nm/CCS/NanGate_15nm_OCL_typical_conditional_ccs.lib
+abc -liberty /home/bellee21/progettoEDA/proveSintesi/Syn_libraries/15nm/CCS/NanGate_15nm_OCL_typical_conditional_ccs.lib
 flatten
-dfflibmap -liberty /home/filippo/Desktop/ode4ec/proveSintesi/Syn_libraries/15nm/CCS/NanGate_15nm_OCL_typical_conditional_ccs.lib
-abc -liberty /home/filippo/Desktop/ode4ec/proveSintesi/Syn_libraries/15nm/CCS/NanGate_15nm_OCL_typical_conditional_ccs.lib
-clean
-write_verilog /home/filippo/Desktop/ode4ec/proveSintesi/ITC99/b01/b01.synth.v
+setundef -zero
+clean -purge
+write_verilog /home/bellee21/progettoEDA/proveSintesi/ITC99/b01/b01.synth.v

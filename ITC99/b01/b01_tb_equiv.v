@@ -34,13 +34,13 @@ module tb_equiv;
         .clock(clock), .reset(reset), .test(test), .shift(shift), .tck(tck), .sin(sin), .sout(sout), .line1(line1), .line2(line2), .outp(outp_scan), .overflw(overflw_scan)
     );
 
-    // Generazione Clock Principale
+    // Generazione clock Principale
     initial begin
         clock = 0;
         forever #5 clock = ~clock;
     end
 
-    // Generazione Test Clock (tck)
+    // Generazione Test clock (tck)
     initial begin
         tck = 0;
         forever #7 tck = ~tck;
@@ -56,7 +56,7 @@ module tb_equiv;
         test = 0;
         shift = 0;
         sin = 0;
-        reset = 0; // Reset Active Low
+        reset = 0; // reset Active Low
         line1 = 0;
         line2 = 0;
 
@@ -65,7 +65,7 @@ module tb_equiv;
         #10;
 
         // Inietta 1000 input casuali
-        repeat(1000) begin
+        repeat(20000) begin
             @(negedge clock);
             line1 = $random;
             line2 = $random;
