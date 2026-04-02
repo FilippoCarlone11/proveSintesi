@@ -310,3 +310,6 @@ def main():
 
     # 8: ATPG con atalanta
     atpg_gen(bench_output, args)
+
+if __name__ == "__main__":
+    main()
