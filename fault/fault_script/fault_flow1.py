@@ -57,26 +57,56 @@ def clear_workspace(target_dir):
 
 
 def load_config(file_path):
+    
+    """Legge il file config.cfg e risolve le variabili al suo interno (es. ${VAR})."""
     config = {}
+    #controllo che esista
+    if not file_path.exists():
+        print(f"ERROR: config.cfg '{file_path}' not found.")
+        sys.exit(1)
+    
     with open(file_path, 'r') as f:
         for line in f:
             line = line.strip()
-            # Salta righe vuote e commenti
-            if not line or line.startswith('#'):
+
+            # gestione commenti multiriga
+            if line.startswith('"""'):
+                # caso in cui li ho tutti e due sulla stessa riga 
+                if line.count('"""') >= 2:
+                    continue
+                
+                # se ne ho solo una uso una variabile che switcha
+                in_multiline_comment = not in_multiline_comment
                 continue
-            
-            # Gestisce sia "CHIAVE=VALORE" che "export CHIAVE=VALORE"
-            if "export " in line:
-                line = line.replace("export ", "")
-            
-            if '=' in line:
-                key, value = line.split('=', 1)
-                # .strip() rimuove spazi bianchi e le virgolette superflue
-                config[key.strip()] = value.strip().strip('"').strip("'")
+                
+            # se l'interruttore è acceso, salta la riga e passa alla successiva
+            if in_multiline_comment:
+                continue
+
+            #ignoro i commenti
+            if line and not line.startswith('#'):
+                # Gestisce sia "CHIAVE=VALORE" che "export CHIAVE=VALORE"
+                if "export " in line:
+                    line = line.replace("export ", "")
+                
+                # trovo tutte le righe in cui assegno le variabili
+                if '=' in line:
+                    key, val = line.split('=', 1)
+                    key = key.strip()
+                    val = val.strip().strip('"\'')
+                    
+                    # espando tutte le variabili presenti per evitare problemi
+                    # Sostituisce ${CHIAVE} o $CHIAVE con il valore precedentemente salvato
+                    for k, v in config.items():
+                        val = val.replace(f"${{{k}}}", v)
+                        val = val.replace(f"${k}", v)
+                        
+                    # Se ci sono variabili d'ambiente di sistema (es. $HOME), espande anche quelle
+                    # queste si trovano interne all os
+                    val = os.path.expandvars(val)
+                    
+                    config[key] = val
     return config
-
-
-
 
 
 def main():
@@ -112,13 +142,15 @@ def main():
         sys.exit(0)
 
 
-    # directory generation
+    # genero le cartelle log e img 
     (circuit_dir / "log").mkdir(exist_ok=True)
     if args.images:
         (circuit_dir / "img").mkdir(exist_ok=True)
 
+    #carico il file di config 
     cfg = load_config("config.cfg")
 
+    #fase in cui comprendo la libreria da usare
     if args.node == "15nm":
         liberty_path = cfg.get("LIB_15NM")
         verilog_lib = cfg.get("VERILOG_15NM")
