@@ -145,7 +145,7 @@ def scan_chain(args, liberty_path, verilog_lib, yaml_path, scan_output, synth_ou
     scan_output.write_text(content.replace(f"module {basename}", f"module {basename}_scan", 1))
 
 # funzione di generazione di immagini
-def image_generation(circuit_dir, scan_output, basename):
+def image_generation(circuit_dir, scan_output, basename, synth_output):
     
         print("--- 4. Generazione Immagini ---")
         cmd_scan = ["yosys", "-p", f"read_verilog {scan_output}; hierarchy -auto-top; proc; show -format png -prefix img/{basename}_scan"]
@@ -153,7 +153,15 @@ def image_generation(circuit_dir, scan_output, basename):
         cmd_synth = ["yosys", "-p", f"read_verilog {synth_output}; hierarchy -auto-top; proc; show -format png -prefix img/{basename}_synth"]
         run_cmd(cmd_synth, circuit_dir / "log/img_synth.log", cwd=circuit_dir, exit_on_fail=False)
 
-
+# funzione che genera i testbench e fa una simulazione
+def tb_n_sim(script_dir, input_verilog, tb_output, circuit_dir, synth_output, scan_output, verilog_lib):
+    
+    print("--- 5. Generazione Testbench e Sim ---")
+    # tramite il codice python genero i testbench
+    run_cmd(["python3", str(script_dir / "generate_tb.py"), str(input_verilog), str(tb_output)], circuit_dir / "log/tb_gen.log")
+    # eseguo la simulazione
+    run_cmd(["iverilog", "-o", str(circuit_dir / "sim.vvp"), str(tb_output), str(synth_output), str(scan_output), verilog_lib], circuit_dir / "log/iverilog.log")
+    run_cmd(["vvp", str(circuit_dir / "sim.vvp")], circuit_dir / "log/vvp.log")
 
 def main():
 
@@ -230,4 +238,7 @@ def main():
 
     #4 : immagini
     if args.images:
-        image_generation(circuit_dir, scan_output, basename)
+        image_generation(circuit_dir, scan_output, basename, synth_output)
+
+    # 5 : testbench e simulazione
+    tb_n_sim(script_dir, input_verilog, tb_output, circuit_dir, synth_output, scan_output, verilog_lib)
