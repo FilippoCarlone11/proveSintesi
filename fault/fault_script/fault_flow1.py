@@ -144,6 +144,17 @@ def scan_chain(args, liberty_path, verilog_lib, yaml_path, scan_output, synth_ou
     content = scan_output.read_text()
     scan_output.write_text(content.replace(f"module {basename}", f"module {basename}_scan", 1))
 
+# funzione di generazione di immagini
+def image_generation(circuit_dir, scan_output, basename):
+    
+        print("--- 4. Generazione Immagini ---")
+        cmd_scan = ["yosys", "-p", f"read_verilog {scan_output}; hierarchy -auto-top; proc; show -format png -prefix img/{basename}_scan"]
+        run_cmd(cmd_scan, circuit_dir / "log/img_scan.log", cwd=circuit_dir, exit_on_fail=False)
+        cmd_synth = ["yosys", "-p", f"read_verilog {synth_output}; hierarchy -auto-top; proc; show -format png -prefix img/{basename}_synth"]
+        run_cmd(cmd_synth, circuit_dir / "log/img_synth.log", cwd=circuit_dir, exit_on_fail=False)
+
+
+
 def main():
 
     # arguments parsing
@@ -217,7 +228,6 @@ def main():
     # 3: scan chain
     scan_chain(args, liberty_path, verilog_lib, yaml_path, scan_output, synth_output, circuit_dir, basename)
 
-
-    
-
-
+    #4 : immagini
+    if args.images:
+        image_generation(circuit_dir, scan_output, basename)
