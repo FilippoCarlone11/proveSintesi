@@ -52,32 +52,6 @@ def clear_workspace(target_dir):
                 
     print(f"--- Pulizia Completata ({count} file rimossi) ---")
 
-
-""" FUNZIONI PER IL TOOL """
-
-#funzione che genera il file yosys
-def yosys_script_generation(yosys_script, input_verilog, basename, liberty_path, synth_output):
-    ys_content = f"""read_verilog {input_verilog}
-        hierarchy -check -top {basename}
-        synth -top {basename}
-        splitnets -ports
-        opt_clean -purge
-        dfflibmap -liberty {liberty_path}
-        abc -liberty {liberty_path}
-        flatten
-        setundef -zero
-        clean -purge
-        write_verilog {synth_output}
-        """
-    #scrivo
-    with open(yosys_script, "w") as f:
-        f.write(ys_content)
-
-#funzione che esegue la sintesi
-def synthesys(yosys_script, circuit_dir): 
-    print("--- 2. Sintesi Yosys ---")
-    run_cmd(["yosys", "-s", str(yosys_script)], circuit_dir / "log/synthesis.log")
-
 # funzione che legge il file config e ritorna un dizionario con nome variabile contenuto
 # risolvendo anche variabili annidate
 def load_config(file_path):
@@ -131,6 +105,44 @@ def load_config(file_path):
                     config[key] = val
     return config
 
+
+""" FUNZIONI PER IL TOOL """
+
+#funzione che genera il file yosys
+def yosys_script_generation(yosys_script, input_verilog, basename, liberty_path, synth_output):
+    ys_content = f"""read_verilog {input_verilog}
+        hierarchy -check -top {basename}
+        synth -top {basename}
+        splitnets -ports
+        opt_clean -purge
+        dfflibmap -liberty {liberty_path}
+        abc -liberty {liberty_path}
+        flatten
+        setundef -zero
+        clean -purge
+        write_verilog {synth_output}
+        """
+    #scrivo
+    with open(yosys_script, "w") as f:
+        f.write(ys_content)
+
+#funzione che esegue la sintesi
+def synthesys(yosys_script, circuit_dir): 
+    print("--- 2. Sintesi Yosys ---")
+    run_cmd(["yosys", "-s", str(yosys_script)], circuit_dir / "log/synthesis.log")
+
+# funzione che esegue la scan chain
+def scan_chain(args, liberty_path, verilog_lib, yaml_path, scan_output, synth_output, circuit_dir, basename):
+    
+    # vera e propria scan chain
+    print("--- 3. Inserimento Scan Chain ---")
+    run_cmd(["fault", "chain", "--clock", args.clock, "--reset", args.reset,
+             "-l", liberty_path, "-c", verilog_lib, "-s", str(yaml_path),
+             "-o", str(scan_output), str(synth_output)], circuit_dir / "log/scan.log")
+    
+    # cambio nome al top dato il _scan
+    content = scan_output.read_text()
+    scan_output.write_text(content.replace(f"module {basename}", f"module {basename}_scan", 1))
 
 def main():
 
@@ -201,6 +213,9 @@ def main():
 
     # 2: synthesis
     synthesys(yosys_script, circuit_dir)
+
+    # 3: scan chain
+    scan_chain(args, liberty_path, verilog_lib, yaml_path, scan_output, synth_output, circuit_dir, basename)
 
 
     
