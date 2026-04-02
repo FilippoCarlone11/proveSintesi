@@ -13,3 +13,13 @@ img/
 **/*.vvp
 **/*.vcd
 **/*.log
+
+*.synth*
+*.cut*
+*.bench
+*_synth*
+*.test
+parser.out
+parsetab.py
+*_tb_equiv*
+*.scan*
