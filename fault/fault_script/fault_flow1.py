@@ -221,6 +221,7 @@ def atpg_gen(bench_output, args, circuit_dir, test_patterns):
     # utilizzo atalanta
     atalanta(circuit_dir, test_patterns, bench_output)
 
+
 def main():
 
     # arguments parsing
