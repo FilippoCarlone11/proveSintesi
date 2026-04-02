@@ -8,6 +8,22 @@ import re
 import shutil
 from pathlib import Path
 
+
+#funzione per eseguire comandi shell usando subprocess.run
+def run_cmd(cmd, log_file, cwd=None, exit_on_fail=True):
+    """Esegue un comando di shell, salva il log e gestisce gli errori."""
+    #print(f"Esecuzione: {' '.join(cmd)}")
+    #scrivo sul file di log per poter osservare eventuali problemi
+    with open(log_file, 'w') as f:
+        result = subprocess.run(cmd, stdout=f, stderr=subprocess.STDOUT, cwd=cwd, text=True)
+    
+    #gestisco l'errore
+    if result.returncode != 0 and exit_on_fail:
+        print(f"ERRORE: Comando fallito. Controlla {log_file}")
+        sys.exit(1)
+    return result.returncode
+
+
 #funzione che genera il file yosys
 def yosys_script_generation(yosys_script, input_verilog, basename, liberty_path, synth_output):
     ys_content = f"""read_verilog {input_verilog}
@@ -25,6 +41,11 @@ def yosys_script_generation(yosys_script, input_verilog, basename, liberty_path,
     #scrivo
     with open(yosys_script, "w") as f:
         f.write(ys_content)
+
+#funzione che esegue la sintesi
+def synthesys(yosys_script, circuit_dir): 
+    print("--- 2. Sintesi Yosys ---")
+    run_cmd(["yosys", "-s", str(yosys_script)], circuit_dir / "log/synthesis.log")
 
 # funzione che pulisce tutti quant i file 
 def clear_workspace(target_dir):
@@ -177,7 +198,7 @@ def main():
     yosys_script_generation(yosys_script, input_verilog, basename, liberty_path, synth_output)
 
     # 2: synthesis
-    
+    synthesys(yosys_script, circuit_dir)
 
 
     
