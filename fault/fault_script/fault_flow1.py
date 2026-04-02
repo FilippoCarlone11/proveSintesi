@@ -28,29 +28,16 @@ def run_cmd(cmd, log_file, cwd=None, exit_on_fail=True):
 def clear_workspace(target_dir):
     print(f"--- Pulizia Workspace in {target_dir.name} ---")
     
-    # elimino le cartelle log e img con tutto il contenuto
-    for folder in ['log', 'img']:
+    # elimino tutte le cartelle di lavoro
+    folders_to_remove = ['log', 'img', 'synthesis', 'scan', 'simulation', 'atpg']
+    
+    for folder in folders_to_remove:
         d = target_dir / folder
         if d.exists() and d.is_dir():
             shutil.rmtree(d)
             print(f"Rimossa cartella: {folder}/")
-
-    # elimino tutti i file che hanno i suffissi nella tabella( file che sono stati creati a runtime )
-    suffixes_to_remove = [
-        '.synth.v', '.vec', '.scan.v', '.cut.v', '.bench', '_synth.ys', 
-        '_tb_equiv.v', '.test', 'sim.vvp', '.sv', '.out', '.py', '.vcd', '.v+attributes', '.v+attrs','.chain-intermediate.v', '.log', '.ys'
-    ]
-    
-    count = 0
-    for f in target_dir.iterdir():
-        if f.is_file():
-            # Controlla se la fine del file corrisponde a uno dei nostri suffissi spazzatura
-            if any(f.name.endswith(suffix) for suffix in suffixes_to_remove):
-                f.unlink()
-                print(f"Rimosso: {f.name}")
-                count += 1
                 
-    print(f"--- Pulizia Completata ({count} file rimossi) ---")
+    print(f"--- Pulizia Completata ---")
 
 # funzione che legge il file config e ritorna un dizionario con nome variabile contenuto
 # risolvendo anche variabili annidate
@@ -195,11 +182,15 @@ def image_generation(circuit_dir, scan_output, basename, synth_output):
 def tb_n_sim(script_dir, input_verilog, tb_output, circuit_dir, synth_output, scan_output, verilog_lib):
     
     print("--- 5. Generazione Testbench e Sim ---")
+
+    sim_dir = circuit_dir / "simulation"
+    sim_vvp = sim_dir / "sim.vvp"
     # tramite il codice python genero i testbench
     run_cmd(["python3", str(script_dir / "generate_tb.py"), str(input_verilog), str(tb_output)], circuit_dir / "log/tb_gen.log")
+    # compilo la simulazione posizionando sim.vvp nella cartella giusta
+    run_cmd(["iverilog", "-o", str(sim_vvp), str(tb_output), str(synth_output), str(scan_output), verilog_lib], circuit_dir / "log/iverilog.log")
     # eseguo la simulazione
-    run_cmd(["iverilog", "-o", str(circuit_dir / "sim.vvp"), str(tb_output), str(synth_output), str(scan_output), verilog_lib], circuit_dir / "log/iverilog.log")
-    run_cmd(["vvp", str(circuit_dir / "sim.vvp")], circuit_dir / "log/vvp.log")
+    run_cmd(["vvp", str(sim_vvp)], circuit_dir / "log/vvp.log", cwd=sim_dir)
 
 # funzione che esegue la cut insertion
 def cut_insertion(cut_output ,yaml_path, args, scan_output, circuit_dir):
@@ -258,10 +249,13 @@ def main():
         sys.exit(0)
 
 
-    # genero le cartelle log e img 
-    (circuit_dir / "log").mkdir(exist_ok=True)
+    # genero le cartelle dove andranno gli output
+    folders = ["log", "synthesis", "scan", "simulation", "atpg"]
     if args.images:
-        (circuit_dir / "img").mkdir(exist_ok=True)
+        folders.append("img")
+        
+    for folder in folders:
+        (circuit_dir / folder).mkdir(exist_ok=True)
 
     #carico il file di config 
     cfg = load_config(script_dir / "config.cfg")
@@ -294,14 +288,13 @@ def main():
     yaml_path = script_dir / library_config
 
     #output file names
-    synth_output = circuit_dir / f"{basename}.synth.v"
-    scan_output = circuit_dir / f"{basename}.scan.v"
-    cut_output = circuit_dir / f"{basename}.cut.v"
-    bench_output = circuit_dir / f"{basename}.bench"
-    yosys_script = circuit_dir / f"{basename}.ys"
-    tb_output = circuit_dir / f"{basename}_tb_equiv.v"
-    test_patterns = circuit_dir / f"{basename}.test"
-
+    synth_output  = circuit_dir / "synthesis" / f"{basename}.synth.v"
+    yosys_script  = circuit_dir / "synthesis" / f"{basename}.ys"
+    scan_output   = circuit_dir / "scan" / f"{basename}.scan.v"
+    tb_output     = circuit_dir / "simulation" / f"{basename}_tb_equiv.v"
+    cut_output    = circuit_dir / "atpg" / f"{basename}.cut.v"
+    bench_output  = circuit_dir / "atpg" / f"{basename}.bench"
+    test_patterns = circuit_dir / "atpg" / f"{basename}.test"
 
     # 1: script Yosys
     yosys_script_generation(yosys_script, input_verilog, basename, liberty_path, synth_output)

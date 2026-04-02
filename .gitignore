@@ -3,6 +3,10 @@ config.cfg
 thr*/
 log/
 img/
+atpg/
+scan/
+simulation/
+synthesis
 
 *.vvp
 *.vcd
@@ -27,3 +31,5 @@ parsetab.py
 *.synth*
 equiv_test.vcd
 sim.vpp
+scan.log
+synthesis.log
